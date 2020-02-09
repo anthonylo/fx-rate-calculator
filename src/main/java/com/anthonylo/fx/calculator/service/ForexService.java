@@ -2,7 +2,6 @@ package com.anthonylo.fx.calculator.service;
 
 import com.anthonylo.fx.calculator.beans.ExchangeRate;
 import com.anthonylo.fx.calculator.beans.FXRate;
-import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +24,12 @@ class ForexService implements IForexService {
   private String baseUrl;
 
   private final RestTemplate restTemplate;
-  private final Gson gson;
 
   private final Map<String, FXRate> ratesCache;
 
   @Autowired
-  public ForexService(final RestTemplate restTemplate, final Gson gson) {
+  public ForexService(final RestTemplate restTemplate) {
     this.restTemplate = restTemplate;
-    this.gson = gson;
 
     ratesCache = new ConcurrentHashMap<>();
   }
@@ -52,11 +49,14 @@ class ForexService implements IForexService {
     final LocalDate localDate =
         LocalDate.from(DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(exchangeRate.getDate()));
 
-    return new FXRate(
-        exchangeRate.getBase(),
-        localDate,
-        exchangeRate.getTimeLastUpdate(),
-        exchangeRate.getRates());
+    ratesCache.put(
+        currency,
+        new FXRate(
+            exchangeRate.getBase(),
+            localDate,
+            exchangeRate.getTimeLastUpdate(),
+            exchangeRate.getRates()));
+    return ratesCache.get(currency);
   }
 
   @Override
