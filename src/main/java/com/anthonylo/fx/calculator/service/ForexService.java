@@ -41,10 +41,13 @@ class ForexService implements IForexService {
 
   @Override
   public FXRate fetchFXRate(final String currency) {
+    logger.info("Fetching FX Rate for {}", currency);
     if (ratesCache.containsKey(currency)) return ratesCache.get(currency);
 
     final ExchangeRate exchangeRate =
         restTemplate.getForObject(baseUrl + "/" + currency, ExchangeRate.class);
+
+    assert exchangeRate != null;
 
     final LocalDate localDate =
         LocalDate.from(DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(exchangeRate.getDate()));
@@ -64,6 +67,13 @@ class ForexService implements IForexService {
       final String fromCurrency, final String toCurrency, final BigDecimal amount) {
     final FXRate fxRate = fetchFXRate(fromCurrency);
     final BigDecimal fxRateConversion = fxRate.getFxRate(toCurrency);
-    return amount.multiply(fxRateConversion);
+    final BigDecimal convertedAmount = amount.multiply(fxRateConversion);
+    logger.info(
+        "Calculated FX conversion rate of {} from {} to {} is {}",
+        amount,
+        fromCurrency,
+        toCurrency,
+        convertedAmount);
+    return convertedAmount;
   }
 }
