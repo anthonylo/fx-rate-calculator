@@ -1,0 +1,10 @@
+server:
+  port: 7000
+  servlet:
+    context-path: /api/fx/rates
+spring:
+  application:
+    name: fx-rate-services
+forex:
+  rate:
+    api-url: https://api.exchangerate-api.com/v4/latest
